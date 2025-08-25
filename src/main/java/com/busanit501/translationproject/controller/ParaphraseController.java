@@ -1,7 +1,7 @@
 package com.busanit501.translationproject.controller;
 
-import com.busanit501.react_project.dto.ParaphraseRequest;
-import com.busanit501.react_project.service.ParaphraseService;
+import com.busanit501.translationproject.dto.ParaphraseRequest;
+import com.busanit501.translationproject.service.ParaphraseService;
 import org.json.JSONException;
 import org.springframework.web.bind.annotation.*;
 
