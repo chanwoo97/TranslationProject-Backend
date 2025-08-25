@@ -9,5 +9,5 @@ public class TranslationProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(TranslationProjectApplication.class, args);
     }
-
+// 테스트
 }
