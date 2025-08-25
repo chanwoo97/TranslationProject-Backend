@@ -8,12 +8,11 @@ public class MemberServiceImpl implements MemberService{
     private MemberRepository memberRepsoitory;
     @Override
     public void register(Member member) {
-        if(memberRepsoitory.memberExists(member.getMemberId()))
+        if(memberRepsoitory.existsByMemberId(member.getMemberId()))
         {
             throw new RuntimeException("아이디가 이미 존재합니다.");
         }
         Member encodeMember = Member.builder()
-                .id(member.getId())
                 .memberId(member.getMemberId())
                 .password(member.getPassword())
                 .userName(member.getUserName())
@@ -24,7 +23,7 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public boolean isRegistered(String memberId) {
-        boolean isRegistered = memberRepsoitory.memberExists(memberId);
+        boolean isRegistered = memberRepsoitory.existsByMemberId(memberId);
         return isRegistered;
     }
 }
