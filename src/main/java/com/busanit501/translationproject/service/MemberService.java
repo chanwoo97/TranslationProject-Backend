@@ -7,5 +7,6 @@ public interface MemberService {
     void register(Member member);
     boolean isRegistered(String memberId);
     void join(MemberDTO memberDTO);
+    boolean checkId(String memberId);
 }
 

@@ -39,6 +39,13 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public void join(MemberDTO  memberDTO) {
+        log.info("회원가입 서비스 호출 : " + memberDTO);
+
+        // 아이디 중복 체크
+        if (memberRepository.existsByMemberId(memberDTO.getMemberId())) {
+            throw  new IllegalArgumentException("이미 사용 중인 아이디입니다."); // 예외처리
+        }
+
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(memberDTO.getPassword());
 
@@ -48,13 +55,17 @@ public class MemberServiceImpl implements MemberService{
                 .password(encodedPassword) // 암호화된 비밀번호
                 .userName(memberDTO.getUserName()) // 이름
                 .email(memberDTO.getEmail()) // 이메일
-                .role("USER")
-                .social(false)
                 .build();
 
         // DB 저장
         memberRepository.save(member);
         log.info("회원가입 완료 : " + member.getMemberId());
+    }
 
+    // 아이디 중복 체크
+    @Override
+    public boolean checkId(String memberId) {
+        // memberId가 존재하면 true 반환(중복), 존재하지 않으면 false반환(사용가능)
+        return memberRepository.existsByMemberId(memberId);
     }
 }
