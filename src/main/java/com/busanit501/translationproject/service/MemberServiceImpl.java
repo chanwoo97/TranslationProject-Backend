@@ -1,7 +1,9 @@
 package com.busanit501.translationproject.service;
 
+import com.busanit501.translationproject.domain.APIUser;
 import com.busanit501.translationproject.domain.Member;
 import com.busanit501.translationproject.dto.MemberDTO;
+import com.busanit501.translationproject.repository.APIUserRepository;
 import com.busanit501.translationproject.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
+    private final APIUserRepository apiUserRepository;
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화
 
     @Override
@@ -59,6 +62,12 @@ public class MemberServiceImpl implements MemberService{
 
         // DB 저장
         memberRepository.save(member);
+        APIUser apiUser = APIUser.builder()
+                .memberId(member.getMemberId())
+                .password(member.getPassword())
+                .build();
+        apiUserRepository.save(apiUser);
+
         log.info("회원가입 완료 : " + member.getMemberId());
     }
 

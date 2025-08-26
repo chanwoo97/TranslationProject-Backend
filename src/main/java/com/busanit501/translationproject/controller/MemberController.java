@@ -10,28 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/api/member")
 @RequiredArgsConstructor
 @Log4j2
 public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping("/register")
-    public ResponseEntity<String> join(@Valid @RequestBody MemberDTO memberDTO) {
-        log.info("회원가입 요청 수신 : " + memberDTO);
-        try {
-            memberService.join(memberDTO);
-            return new ResponseEntity<>("회원가입이 완료되었습니다.", HttpStatus.OK);
-        }  catch (IllegalArgumentException e) {
-          log.info("회원가입 실패 (비즈니스 로직) : " + e.getMessage());  // MemberServiceImpl에서 던지는 예외를 직접 처리
-          return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT); // 409 Conflict
-        } catch (Exception e) {
-            log.info("회원가입 실패 : " + e.getMessage());
-            return new ResponseEntity<>("회원가입에 실패하였습니다. : " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST );
-        }
-    }
 
     // 아이디 중복 확인
     @GetMapping("/checkId")
