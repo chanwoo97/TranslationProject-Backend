@@ -49,8 +49,8 @@ public class APILoginFilter extends AbstractAuthenticationProcessingFilter {
         // JSON 데이터에서 사용자 ID와 비밀번호를 추출하여 인증 토큰 생성
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
-                        jsonData.get("mid"), // 사용자 ID
-                        jsonData.get("mpw")  // 사용자 비밀번호
+                        jsonData.get("memberId"), // 사용자 ID
+                        jsonData.get("password")  // 사용자 비밀번호
                 );
 
         // AuthenticationManager를 사용하여 인증 시도
