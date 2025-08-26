@@ -22,4 +22,7 @@ public class Member {
 
     @Column(name = "email")
     private String email;
+
+    private String role;
+    private boolean social;
 }
