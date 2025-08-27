@@ -2,6 +2,7 @@ package com.busanit501.translationproject.service;
 
 import com.busanit501.translationproject.domain.APIUser;
 import com.busanit501.translationproject.domain.Member;
+import com.busanit501.translationproject.dto.ChangePasswordRequestDTO;
 import com.busanit501.translationproject.dto.MemberDTO;
 import com.busanit501.translationproject.repository.APIUserRepository;
 import com.busanit501.translationproject.repository.MemberRepository;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -80,12 +82,34 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public MemberDTO getMember(String memberId) {
-        return memberRepository.findByMemberId(memberId)
+        MemberDTO dto = memberRepository.findByMemberId(memberId)
                 .map(member -> new MemberDTO(
                         member.getMemberId(),
                         member.getUserName(),
                         member.getEmail(),
                         member.getPassword()))
                 .orElse(null);
+        log.info("memberService dto : " + dto);
+        return dto;
+    }
+
+    @Transactional
+    public void changePassword(String memberId, ChangePasswordRequestDTO requestDTO) {
+        // 1. 현재 로그인된 사용자 정보를 DB에서 조회
+        Member member = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        APIUser apiuser = apiUserRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 2. 입력된 '현재 비밀번호'가 저장된 비밀번호와 일치하는지 확인
+        if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), member.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 3. '새 비밀번호'를 암호화하여 엔티티에 설정
+        member.changePw(passwordEncoder.encode(requestDTO.getNewPassword()));
+        apiuser.changePw(member.getPassword());
+        // 4. 변경된 정보를 DB에 저장 (@Transactional에 의해 메서드 종료 시 자동 반영)
+        memberRepository.save(member);
     }
 }

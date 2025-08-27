@@ -17,8 +17,8 @@ public class APIUser {
 
     private String password; // 사용자 비밀번호
 
-    // 비밀번호 변경 메서드
     public void changePw(String mpw) {
         this.password = mpw;
     }
+
 }

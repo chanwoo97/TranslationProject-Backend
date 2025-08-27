@@ -25,4 +25,8 @@ public class Member {
 
     private String role;
     private boolean social;
+
+    public void changePw(String mpw) {
+        this.password = mpw;
+    }
 }
