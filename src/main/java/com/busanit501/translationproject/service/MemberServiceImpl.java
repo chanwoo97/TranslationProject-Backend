@@ -77,4 +77,15 @@ public class MemberServiceImpl implements MemberService{
         // memberId가 존재하면 true 반환(중복), 존재하지 않으면 false반환(사용가능)
         return memberRepository.existsByMemberId(memberId);
     }
+
+    @Override
+    public MemberDTO getMember(String memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .map(member -> new MemberDTO(
+                        member.getMemberId(),
+                        member.getUserName(),
+                        member.getEmail(),
+                        member.getPassword()))
+                .orElse(null);
+    }
 }

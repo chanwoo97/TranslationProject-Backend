@@ -8,5 +8,6 @@ public interface MemberService {
     boolean isRegistered(String memberId);
     void join(MemberDTO memberDTO);
     boolean checkId(String memberId);
+    MemberDTO getMember(String memberId);
 }
 
