@@ -5,6 +5,8 @@ import com.busanit501.translationproject.dto.SummarizeResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,11 +34,13 @@ public class SummarizeController {
 
     @PostMapping
     public ResponseEntity<SummarizeResponse> summarize(@RequestBody SummarizeRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String memberId = authentication.getName();
         log.info("SummarizeController - text: {}", request.getText());
         String language = (request.getLanguage() != null && !request.getLanguage().isEmpty()) ? request.getLanguage() : "ko";
         log.info("SummarizeController - language: {}", language);
 
-        String result = summarizeService.summarize(request.getText(), language);
+        String result = summarizeService.summarize(request.getText(), language, memberId);
         SummarizeResponse response = new SummarizeResponse(result);
         return ResponseEntity.ok(response);
     }

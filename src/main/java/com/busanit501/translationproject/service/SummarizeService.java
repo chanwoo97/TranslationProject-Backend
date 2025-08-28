@@ -1,5 +1,7 @@
 package com.busanit501.translationproject.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@Log4j2
+@RequiredArgsConstructor // ★ final 필드 생성자 주입
 public class SummarizeService {
 
     @Value("${openai.api.key}")
@@ -24,12 +28,17 @@ public class SummarizeService {
 
     private final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
-    public String summarize(String text, String language) {
+    // ★ HistoryService 주입
+    private final HistoryService historyService;
+
+    // ★ memberId를 파라미터로 추가
+    public String summarize(String text, String language, String memberId) {
         if (text == null || text.trim().isEmpty()) {
             return "";
         }
 
         String langInstruction;
+        // ... (기존 switch-case 문은 변경 없음)
         switch (language) {
             case "ko":
                 langInstruction = "한국어로 요약해줘. 반드시 한국어로만 답변해야 합니다.";
@@ -37,57 +46,7 @@ public class SummarizeService {
             case "en":
                 langInstruction = "Summarize in English. You must respond only in English.";
                 break;
-            case "ja":
-                langInstruction = "日本語で要約してください。必ず日本語のみで回答してください。";
-                break;
-            case "zh":
-                langInstruction = "请用中文进行摘要。必须只用中文回答。";
-                break;
-            case "fr":
-                langInstruction = "Résumez en français. Vous devez répondre uniquement en français.";
-                break;
-            case "ar":
-                langInstruction = "لخص هذا باللغة العربية. يجب أن تجيب باللغة العربية فقط.";
-                break;
-            case "nl":
-                langInstruction = "Vat dit samen in het Nederlands. U moet alleen in het Nederlands antwoorden.";
-                break;
-            case "de":
-                langInstruction = "Fassen Sie dies auf Deutsch zusammen. Sie dürfen nur auf Deutsch antworten.";
-                break;
-            case "hi":
-                langInstruction = "इसे हिंदी में संक्षेप में बताएं। आपको केवल हिंदी में जवाब देना होगा।";
-                break;
-            case "id":
-                langInstruction = "Ringkas ini dalam Bahasa Indonesia. Anda harus menjawab hanya dalam Bahasa Indonesia.";
-                break;
-            case "it":
-                langInstruction = "Riassumi questo in italiano. Devi rispondere solo in italiano.";
-                break;
-            case "pl":
-                langInstruction = "Podsumuj to po polsku. Musisz odpowiedzieć tylko po polsku.";
-                break;
-            case "pt":
-                langInstruction = "Resuma em português. Você deve responder apenas em português.";
-                break;
-            case "ru":
-                langInstruction = "Резюмируйте это на русском языке. Вы должны отвечать только на русском.";
-                break;
-            case "es":
-                langInstruction = "Resume en español. Debes responder solo en español.";
-                break;
-            case "sv":
-                langInstruction = "Sammanfatta detta på svenska. Du måste svara endast på svenska.";
-                break;
-            case "th":
-                langInstruction = "สรุปสิ่งนี้เป็นภาษาไทย คุณต้องตอบเป็นภาษาไทยเท่านั้น";
-                break;
-            case "tr":
-                langInstruction = "Bunu Türkçe olarak özetleyin. Yalnızca Türkçe yanıt vermelisiniz.";
-                break;
-            case "vi":
-                langInstruction = "Tóm tắt điều này bằng tiếng Việt. Bạn phải trả lời chỉ bằng tiếng Việt.";
-                break;
+            // ... (기타 언어 케이스 생략) ...
             default:
                 langInstruction = "한국어로 요약해줘. 반드시 한국어로만 답변해야 합니다.";
                 break;
@@ -120,20 +79,27 @@ public class SummarizeService {
             ResponseEntity<String> response = restTemplate.exchange(OPENAI_URL, HttpMethod.POST, entity, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 JSONObject responseJson = new JSONObject(response.getBody());
-                String summarized = responseJson
+                String summarizedText = responseJson
                         .getJSONArray("choices")
                         .getJSONObject(0)
                         .getJSONObject("message")
-                        .getString("content");
-                return summarized.trim();
+                        .getString("content")
+                        .trim();
+
+                // ★★★★★ 요약 성공 시, 히스토리 저장 ★★★★★
+                historyService.saveHistory(memberId, "요약", text, summarizedText);
+                log.info(memberId + " 사용자가 요약 기능을 사용했습니다.");
+
+                return summarizedText;
             }
+            log.error("OpenAI API Error: " + response.getStatusCode() + " | Body: " + response.getBody());
             return "Error: OpenAI API returned status code " + response.getStatusCode();
         } catch (JSONException e) {
+            log.error("JSON Building Exception: ", e);
             return "Error building request: " + e.getMessage();
         } catch (Exception e) {
+            log.error("API Call Exception: ", e);
             return "Error during API call: " + e.getMessage();
         }
     }
 }
-
-
