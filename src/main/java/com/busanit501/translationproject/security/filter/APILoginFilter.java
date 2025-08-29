@@ -20,6 +20,7 @@ public class APILoginFilter extends AbstractAuthenticationProcessingFilter {
 
     // 생성자: 기본 필터 URL 설정
     public APILoginFilter(String defaultFilterProcessesUrl) {
+
         super(defaultFilterProcessesUrl);
     }
 
@@ -28,32 +29,22 @@ public class APILoginFilter extends AbstractAuthenticationProcessingFilter {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
-        // 로깅: 필터 동작 확인
         log.info("APILoginFilter - attemptAuthentication executed");
 
-        // 인증 로직 미구현 상태
-        // GET 요청은 지원하지 않음
-        // 1번 검사, get 요청은 무시
         if (request.getMethod().equalsIgnoreCase("GET")) {
             log.info("GET METHOD NOT SUPPORTED");
             return null;
         }
 
-        // JSON 데이터 파싱
-        // parseRequestJSON: JSON 문자열 -> 자바 Map 형태로 변환,
-        // Map 안에 검사해야하는 mid, mpw 포함되어있음.
         Map<String, String> jsonData = parseRequestJSON(request);
         log.info("Parsed JSON Data: {}", jsonData);
 
-        // TODO: 인증 로직 추가
-        // JSON 데이터에서 사용자 ID와 비밀번호를 추출하여 인증 토큰 생성
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
-                        jsonData.get("memberId"), // 사용자 ID
-                        jsonData.get("password")  // 사용자 비밀번호
+                        jsonData.get("memberId"),
+                        jsonData.get("password")
                 );
 
-        // AuthenticationManager를 사용하여 인증 시도
         return getAuthenticationManager().authenticate(authenticationToken);
 
     }

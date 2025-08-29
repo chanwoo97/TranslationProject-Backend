@@ -69,12 +69,9 @@ public class CustomSecurityConfig {
                 // 평문 암호화 해주는 도구 옵션 추가.
                 .passwordEncoder(passwordEncoder());
 
-        // Get AuthenticationManager 세팅1
         AuthenticationManager authenticationManager =
                 authenticationManagerBuilder.build();
 
-        //반드시 필요 세팅1
-        // 적용하기.
         http.authenticationManager(authenticationManager);
 
         //APILoginFilter 세팅1
@@ -87,9 +84,7 @@ public class CustomSecurityConfig {
 
         // APILoginSuccessHandler 생성: 인증 성공 후 처리 로직을 담당
         APILoginSuccessHandler successHandler = new APILoginSuccessHandler(jwtUtil);
-//        APILoginSuccessHandler successHandler = new APILoginSuccessHandler();
 
-// SuccessHandler 설정: 로그인 성공 시 APILoginSuccessHandler가 호출되도록 설정
         apiLoginFilter.setAuthenticationSuccessHandler(successHandler);
 
         //APILoginFilter의 위치 조정 세팅1, 사용자 인증 전에 ,
